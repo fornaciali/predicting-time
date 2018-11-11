@@ -1,3 +1,9 @@
+# File/folder related to the problem
+data/
+util/*txt
+*model
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
