@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pickle 
 
-from sklearn import metrics
 from sklearn.ensemble import GradientBoostingRegressor
 
 def get_args():
@@ -21,7 +20,7 @@ def main():
 
 	args = get_args()
 	
-	# abre o arquivo, amplia as features e limpa os dados nao numericos
+	# Opens the summary.csv file, expands the features and clears the non-numeric data.
 	print("Reading data...")
 	data = pd.read_csv(args.summary_data_file, index_col=0)
 	time = data.assessment_end_time - data.assessment_start_time
@@ -33,13 +32,13 @@ def main():
 	priority_level = {'normal': 0, 'urgent': 1}
 	data.priority.replace(priority_level, inplace=True)
 	
-	# remove as features nao necessarias para gerar o modelo
+	# Remove the unnecessary features to generate the model.
 	X_train = data.drop(['assessment_end_time', 'assessment_start_time', 
 		'consultation_end_time', 'consultation_start_time', 'day', 'patient', 
 		'duration'], axis=1)
 	Y_train = data['duration']
 	
-	# gera e persiste o modelo oficial
+	# Generates and persists the official model
 	print("Generating the model...")
 	model = GradientBoostingRegressor()
 	model.fit(X_train, Y_train)

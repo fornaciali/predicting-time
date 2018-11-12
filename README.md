@@ -45,5 +45,6 @@ I'm using Anaconda, with Python3 as default, to create an environment to run the
 1. Change the sixth line of file `file_evaluation.py` from ```from your_model import get_estimate, ...```  to ```from your_model_queue import get_estimate, ...```
 1. Run ```python evaluate.py SUBFOLDER_NAME```. *Where*: `SUBFOLDER_NAME` is the folder that contains the data to evaluate the code. 
 
+**Bonus**: To generate the table of model selection for "waiting time for consultation", run: ```python util\analyse_models_queue.py FOLDS_FOLDER SUMMARY_DATA_FILE ```. *Where*: `FOLDS_FOLDER` is the folder with the 5-fold files, and `SUMMARY_DATA_FILE` is the fullpath for the `summary.csv` file.
 
 

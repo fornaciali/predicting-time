@@ -13,7 +13,7 @@ def get_args():
 
 
 def save_fold(folder, fold_ID, train, test):
-    '''
+    """
     Save the folds into TXT files, using 2 lines: the first to the training data 
     and the second for the testing data. Data is the ID of the days, from 1 to 50. 
 
@@ -22,7 +22,7 @@ def save_fold(folder, fold_ID, train, test):
     - fold_ID (int): the ID of the fold being saved 
     - train (list) : the traning set of the fold 
     - test (list) : the testing set of the fold
-    '''
+    """
 
     file_name = os.path.join(folder, "fold_"+str(fold_ID)+".txt")
     f = open(file_name, "w")

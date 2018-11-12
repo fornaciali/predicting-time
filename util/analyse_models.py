@@ -16,15 +16,12 @@ from sklearn.svm import SVR
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import RandomForestRegressor
 
-
-from sklearn.feature_selection import VarianceThreshold
-
-
-
+# The machine learning models to predict the CONSULTATION TIME
 ml_models = [LinearRegression(), GradientBoostingRegressor(), SGDRegressor(max_iter=1000), 
 		KNeighborsRegressor(), GaussianProcessRegressor(), DecisionTreeRegressor(), 
 		MLPRegressor(max_iter=1000), SVR(gamma='scale'), RandomForestRegressor(n_estimators=100)]
 
+# The nomes of machine learning (or not) approaches to model the prediction estimates
 ml_models_names = ['baseline', 'baseline_plus', 'LinearRegression', 'GradientBoostingRegressor', 
 		'SGDRegressor', 'KNeighborsRegressor', 'GaussianProcessRegressor', 'DecisionTreeRegressor', 
 		'MLPRegressor', 'SVR', 'RandomForestRegressor', 'LinearRegression w/ extra features', 
@@ -32,23 +29,6 @@ ml_models_names = ['baseline', 'baseline_plus', 'LinearRegression', 'GradientBoo
 		'KNeighborsRegressor w/ extra features', 'GaussianProcessRegressor w/ extra features', 
 		'DecisionTreeRegressor w/ extra features', 'MLPRegressor w/ extra features', 
 		'SVR w/ extra features', 'RandomForestRegressor w/ extra features']
-
-		
-
-
-
-# TODO: MOVER PARA OUTRO LUGAR OU APAGAR! 
-def feature_selection(data, test_IDs):
-
-	test = data[data['day'].isin(test_IDs)]
-	print(test.columns)
-
-	sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
-	sel.fit_transform(test)
-	new_data = sel.transform(test)
-	print(new_data)
-	#print(new_data.columns)
-
 
 
 def get_args():
@@ -69,41 +49,54 @@ def readFold(folder, fold_ID):
 	return train, test
 
 
-# TODO: AVALIAR SE USAR ESSA METRICA DE AVALIACAO OU NAO... EH A MESMA DO ANDRE.
-#def evaluate(consultation_end_time, assessment_end_time, consultation_duration_time):
-#	log_consul = np.array([log(x) for x in consultation_end_time])
-#	log_assess = np.array([log(x) for x in assessment_end_time])
-#	log_durati = np.array([log(x) for x in consultation_duration_time])
-#	return np.sqrt(np.mean( ((log_consul - log_assess) - (log_durati))**2 ))
-	
-
-# baseline
 def generate_approach_v0(train, test):
+	"""
+	The baseline : return the RMSE considering the prediction as the average 
+	consultation time of the training data
 
+	Arguments:
+	- train (DataFrame) : the training data
+	- test (DataFrame) : the testing data
+
+	"""
 	print("	Evaluating approach [baseline]")
-
 	consultation_duration_mean = train.duration.mean()
-	
 	y_pred = np.array( [consultation_duration_mean for i in range(len(test.duration))] )
-	
 	return [np.sqrt(metrics.mean_squared_error(test.duration, y_pred))]
 
 
-# baseline plus
 def generate_approach_v1(train, test):
+	"""
+	The baseline PLUS : return the RMSE considering the prediction as the average 
+	consultation time of the training data, depending on the patient priority 
+	(normal or urgent)
 
+	Arguments:
+	- train (DataFrame) : the training data
+	- test (DataFrame) : the testing data
+
+	"""
 	print("	Evaluating approach [baseline_plus]")
-
 	consultation_duration_ifNormal_mean = train[train.priority == 0].duration.mean() 	
 	consultation_duration_ifUrgent_mean = train[train.priority == 1].duration.mean() 
-		
 	y_pred = np.array([ consultation_duration_ifNormal_mean if i == 0 else 
 		consultation_duration_ifUrgent_mean for i in test.priority ])
-		
 	return [np.sqrt(metrics.mean_squared_error(test.duration.values, y_pred))]
 
 
 def evaluate_model(model, model_name, X_train, Y_train, X_test, ground_truth):
+	"""
+	Given a Machine Learning Regression model (ML), and the training/testing data, 
+	evaluate it and return the desired metric (RMSE). 
+
+	Arguments: 
+	- model (a sklearn class) : the ML model under evaluation 
+	- model_name (str): the name of the ML model under evalution
+	- X_train (DataFrame) : the training data
+	- Y_train (DataFrame) : the original values of the training data
+	- X_test (DataFrame): the testing data
+	- ground_truth (DataFrame) : the original values of the training data
+	"""
 	print("		Model [" + model_name + "]")
 	model.fit(X_train, Y_train)
 	Y_pred = model.predict(X_test).astype(int)
@@ -111,9 +104,17 @@ def evaluate_model(model, model_name, X_train, Y_train, X_test, ground_truth):
 	return regression
 	
 
-# Machine Learning Tunning 
 def generate_approach_v2(train, test):
-	
+	"""
+	The Machine Learning : return the RMSE considering the best regression model 
+	for the problem among several options (linear regressions, SVM, neural networks, 
+	decision trees, ensembles), using just the original features
+
+	Arguments:
+	- train (DataFrame) : the training data
+	- test (DataFrame) : the testing data
+
+	"""
 	print("	Evaluating approaches [Machine Learning]")
 
 	X_train = train.drop(['assessment_duration', 'waiting_4_assessment_duration', 
@@ -134,9 +135,17 @@ def generate_approach_v2(train, test):
 	return results
 
 
-# Machine Learning Tunning, com os dados extras 
 def generate_approach_v3(train, test):
+	"""
+	The Machine Learning PLUS : return the RMSE considering the best regression model 
+	for the problem among several options (linear regressions, SVM, neural networks, 
+	decision trees, ensembles), using the original and extended features
 
+	Arguments:
+	- train (DataFrame) : the training data
+	- test (DataFrame) : the testing data
+
+	"""
 	print("	Evaluating approaches [Machine Learning], [using extra information]")
 	
 	X_train = train.drop(['assessment_end_time', 'assessment_start_time', 
@@ -170,7 +179,7 @@ def print_results(folds):
 def main():
 	args = get_args()
 	
-	# abre o arquivo, amplia as features e limpa os dados nao numericos
+	# Open the summary.csv file, expands the features and clears the non-numeric data.
 	data = pd.read_csv(args.summary_data_file, index_col=0)
 	time = data.assessment_end_time - data.assessment_start_time
 	data['assessment_duration'] = time
@@ -182,18 +191,18 @@ def main():
 	data.priority.replace(priority_level, inplace=True)
 	
 
-	# obtem as metricas (RMSE) para cada fold
+	# Get the metrics (RMSE) for each fold
 	folds = {}
 	for i in range(1,6):
 		
 		print("Fold ({}): {}".format(i, '-'*50))
 
-		# seleciona os dias de TREINO e TESTE, separando os dados nas 2 particoes
+		# Select TRAIN and TEST sets
 		train_IDs, test_IDs = readFold(args.folds_folder, i)
 		train = data[data['day'].isin(train_IDs)]
 		test = data[data['day'].isin(test_IDs)]
 
-		# gera e salva as predicoes para cada abordagem
+		# Generate and stores the predictions for each approach
 		folds[i] = []
 		folds[i] += generate_approach_v0(train, test)
 		folds[i] += generate_approach_v1(train, test)
@@ -203,7 +212,7 @@ def main():
 		print()
 		
 		
-	# mostra e consolida (calcula a média dos folds) os resultados por abordagem
+	# Consolidate (calculates the average of the folds) and show the results by approach
 	print_results(folds)
 
 
