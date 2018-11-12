@@ -3,10 +3,7 @@ import math
 
 import pandas as pd
 
-
-# TODO : lembrar de deixar a opcao oficial aqui antes de entregar!!! 
 from your_model import get_estimate, get_features, get_model, get_state_machine, update_state
-
 #  Place your model in a module name called 'your_model' in the same folder as this file
 
 

@@ -31,13 +31,6 @@ def predict_consultation_duration(patient_info, patient_priority=''):
     model = pickle.load(open(filename, 'rb'))
     Y_pred = model.predict(X_test).astype(int)
     
-    #if patient_priority == 'normal':
-    #    return 474
-    #elif patient_priority == 'urgent':
-    #    return 1014
-    #else:
-    #    return 629
-
     return Y_pred	
 		
 
@@ -150,7 +143,3 @@ def update_state(state_machine, event):
 
         state_machine[event.patient]['consultation_end_time'] = event.time
 
-    else:
-
-        # TODO: apagar, ficou soh para debug
-        print("----------> [ERRO: evento desconhecido ")

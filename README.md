@@ -6,15 +6,16 @@ This is my solution for a Data Science challenge, on which I had to predict the 
 
 # Instructions to run the code
 
+We have below the instructions to generate the official final solution and the alternatives discussed on the slides presentation. 
+
 
 ## First things first
 
-
 ### Environment to run the code
 
-I'm using Anaconda to create an environment to run the code. The following commands are "conda-related" and may differ according your SO. 
+I'm using Anaconda, with Python3 as default, to create an environment to run the code. The following commands are "conda-related" and may differ according your SO and Python installation. 
 
-1. Run ```conda create env project```
+1. Run ```conda create -n project```
 1. Run ```activate project```
 1. Run ```pip install -r requirements.txt```
 
@@ -31,9 +32,6 @@ I'm using Anaconda to create an environment to run the code. The following comma
 1. Run ```python evaluate.py SUBFOLDER_NAME```. *Where*: `SUBFOLDER_NAME` is the folder that contains the data to evaluate the code. 
 
 
-
-
-
 ## Understanding the steps to generate the final prediction model
 
 1. Generate the 5-folds files by running: ```python util\generate_folds.py FOLDS_FOLDER```. *Where*: `FOLDS_FOLDER` is the folder that will store the 5-fold files.
@@ -42,3 +40,10 @@ I'm using Anaconda to create an environment to run the code. The following comma
 
 
 ## Generating alternative prediction modes and evaluating them
+
+1. Generate the alternative models, by running: ```python util\generate_model_queue.py SUMMARY_DATA_FILE```. *Where*: `SUMMARY_DATA_FILE` is the fullpath for the `summary.csv` file.
+1. Change the sixth line of file `file_evaluation.py` from ```from your_model import get_estimate, ...```  to ```from your_model_queue import get_estimate, ...```
+1. Run ```python evaluate.py SUBFOLDER_NAME```. *Where*: `SUBFOLDER_NAME` is the folder that contains the data to evaluate the code. 
+
+
+

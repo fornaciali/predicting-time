@@ -1,7 +1,7 @@
 # File/folder related to the problem
 data/
 util/*txt
-*model
+*.model
 
 
 # Byte-compiled / optimized / DLL files
