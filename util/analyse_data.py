@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Generates and persists the 5-folds.')
+    parser = argparse.ArgumentParser(description='Generating graphics.')
     parser.add_argument('summary_data_file', type=str)
     args = parser.parse_args()
     return args
@@ -19,111 +19,75 @@ def save_info(file_path_and_name, info):
     f.close()
 
 
-# PARAMETROS:
-#   - arquivo de dados (summary)
-
-
-# arrival_time    assessment_end_time assessment_start_time   consultation_end_time   consultation_start_time day duration    pain    patient priority    temperature
-
-
-# Carregar os dados (todos)
-print("Carregando...")
+# Load data
+print("Loading...")
 args = get_args()
 data = pd.read_csv(args.summary_data_file)
 print("Done!")
 
 
+# Extend the data with extra features
+data = pd.read_csv(args.summary_data_file, index_col=0)
+time = data.assessment_end_time - data.assessment_start_time
+data['assessment_duration'] = time
+time = data.assessment_start_time - data.arrival_time
+data['waiting_4_assessment_duration'] = time
+pain_level = {'no pain': 0, 'moderate pain': 1, 'severe pain': 2}
+data.pain.replace(pain_level, inplace=True)
+priority_level = {'normal': 0, 'urgent': 1}
+data.priority.replace(priority_level, inplace=True)
 
-# Ampliar os dados com features extras
-
-# Salvar arquivo extendido e usar o bonito na geracao do modelo ? 
-
-
-# Exibir estatisticas consolidadas 
-#print(data.head())
-
+# View and save consolidated statistics
+#print(data.describe())
 #save_info("stats.txt", data.describe().to_string())
 
-print(data.describe())
-
-#print(set(data['pain'].values))
-
-#print(data[data['day'] == 1])
-
-#print(data.temperature)
-
-
-
-
-# TODO : tracar a media em vermelho como reta!!!
-
-
-# grafico de TEMPERATURA x DURACAO DA CONSULTA 
-
-time_queue = data.consultation_start_time - data.assessment_end_time
-
-print(np.corrcoef(data.temperature, data.duration))
-
-plt.scatter(data.temperature, time_queue) #data.duration)
-plt.title("TEMPERATURA x DURACAO DA CONSULTA")
-plt.show(block=True)
-
-
-# grafico de TEMPO PARA 1º ATENDIMENTO x DURACAO DA CONSULTA 
-
-print(np.corrcoef(data.assessment_start_time - data.arrival_time, data.duration))
-
-plt.scatter(data.assessment_start_time - data.arrival_time, time_queue) #data.duration)
-plt.title("TEMPO PARA 1º ATENDIMENTO x DURACAO DA CONSULTA")
-plt.show(block=True)
-
-
-#print(np.corrcoef(data.pain, data.duration))
-
-plt.scatter(data.pain, time_queue) #data.duration)
-plt.title("DOR x DURACAO DA CONSULTA")
-plt.show(block=True)
-
-
-#print(np.corrcoef(data.priority, data.duration))
-
-plt.scatter(data.priority, time_queue) #data.duration)
-plt.title("PRIORIDADE x DURACAO DA CONSULTA")
-plt.show(block=True)
-
-
+print("Arrival time correlation:")
 print(np.corrcoef(data.arrival_time, data.duration))
-
-plt.scatter(data.arrival_time, time_queue) #data.duration)
-plt.title("HORARIO CHEGADA x DURACAO DA CONSULTA")
+plt.scatter(data.arrival_time, data.duration)
+plt.title("ARRIVAL TIME x CONSULTATION DURATION")
 plt.show(block=True)
 
+print("Time for assessment correlation:")
+print(np.corrcoef(data.assessment_start_time - data.arrival_time, data.duration))
+plt.scatter(data.assessment_start_time - data.arrival_time, data.duration)
+plt.title("TIME FOR ASSESSMENT x CONSULTATION DURATION")
+plt.show(block=True)
 
-# distribuicao percentual de DOR
-labels = set(data['pain'].values)
-sizes = [len(data[data['pain'] == x]) for x in labels]
-explode = (0, 0, 0)  
+print("Temperature correlation:")
+print(np.corrcoef(data.temperature, data.duration))
+plt.scatter(data.temperature, data.duration)
+plt.title("TEMPERATURE x CONSULTATION DURATION")
+plt.show(block=True)
 
-#fig1, ax1 = plt.subplots()
-#ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
-#ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+print("Pain level correlation:")
+print(np.corrcoef(data.pain, data.duration))
+plt.scatter(data.pain, data.duration)
+plt.title("PAIN LEVEL x CONSULTATION DURATION")
+plt.show(block=True)
 
-#plt.show()
+print("Priority correlation:")
+print(np.corrcoef(data.priority, data.duration))
+plt.scatter(data.priority, data.duration)
+plt.title("PRIORITY x CONSULTATION DURATION")
+plt.show(block=True)
 
+print("Assessment duration correlation:")
+print(np.corrcoef(data.assessment_end_time - data.assessment_start_time, data.duration))
+plt.scatter(data.assessment_end_time - data.assessment_start_time, data.duration)
+plt.title("ASSESSMENT DURATION x CONSULTATION DURATION")
+plt.show(block=True)
 
+print("Time for consultation correlation:")
+print(np.corrcoef(data.consultation_start_time - data.assessment_end_time, data.duration))
+plt.scatter(data.consultation_start_time - data.assessment_end_time, data.duration)
+plt.title("TIME FOR CONSULTATION x CONSULTATION DURATION")
+plt.show(block=True)
 
-# histograma de HORÁRIO DE CHEGADA x DURAÇÃO DA CONSULTA
 x = list(data['arrival_time'])
-
-n, bins, patches = plt.hist(x, 40, density=False, color='g')
+n, bins, patches = plt.hist(x, 40, density=False, color='b')
 plt.xlabel('Arrival Time')
 plt.ylabel('Quantity')
-plt.title('HISTOGRAMA DE DURAÇÃO DA CONSULTA POR HORÁRIO DE CHEGADA')
+plt.title('HISTOGRAM OF ARRIVAL TIME')
 plt.axis([-500, 15000, 0, 200])
 plt.grid(True)
 plt.show()
-
-# descobrir a feature mais importante (maior correlacao) com duracao de consulta
-
-# correlação entre horário de pico X tempo de consulta (geral?);
-# correlação de tempo de atendimento com urgência;
