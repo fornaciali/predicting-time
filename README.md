@@ -15,9 +15,8 @@ We have below the instructions to generate the official final solution and the a
 
 I'm using Anaconda, with Python3 as default, to create an environment to run the code. The following commands are "conda-related" and may differ according your SO and Python installation. 
 
-1. Run ```conda create -n project```
-1. Run ```activate project```
-1. Run ```pip install -r requirements.txt```
+1. Run ```conda env create -f environment.yml```
+1. Run ```activate coding_test```
 
 
 ### Data preparation
